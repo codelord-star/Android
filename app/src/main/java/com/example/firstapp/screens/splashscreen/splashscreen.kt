@@ -28,7 +28,7 @@ import com.example.firstapp.navigation.ROUTE_LOGIN
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(navController: NavHostController){
+fun Splashscreen(navController: NavHostController){
     LaunchedEffect(true) {
         delay(2000)
         navController.navigate(ROUTE_LOGIN)
@@ -59,5 +59,5 @@ fun SplashScreen(navController: NavHostController){
 @Preview
 @Composable
 fun SplashPreview(){
-    SplashScreen(rememberNavController())
+    Splashscreen(rememberNavController())
 }

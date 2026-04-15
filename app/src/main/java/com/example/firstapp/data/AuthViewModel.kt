@@ -73,7 +73,7 @@ class AuthViewModel(var navController: NavHostController, var context: Context){
             val ref = FirebaseDatabase.getInstance()
                 .getReference("Users/$userId")
 
-            ref.get().addOnCompleteListener { snapshot ->
+            ref.get().addOnSuccessListener { snapshot ->
                 val name = snapshot.child("fullname").value.toString()
                 onResult(name)
             }.addOnFailureListener {
