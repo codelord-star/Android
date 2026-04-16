@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +43,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.firstapp.R
+import com.example.firstapp.data.ProductViewModel
 
 /*
 create addproduct screen
@@ -121,7 +123,21 @@ fun AddProduct(navController: NavHostController){
             Text("Choose an image")
         }
 
-        Button(onClick = {},
+        val context= LocalContext.current
+        val myproductviewmodel= ProductViewModel(navController,context)
+        Button(onClick = {
+            myproductviewmodel.uploadProduct(
+                imageUri = imageUri,
+                name = productname,
+                price = price,
+                description = desc,
+            )
+            //clear textfields
+            productname=""
+            price=""
+            desc=""
+            imageUri=null
+        },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Blue
