@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.firstapp.data.AuthViewModel
 import com.example.firstapp.navigation.ROUTE_ADDPRODUCT
+import com.example.firstapp.navigation.ROUTE_LISTPRODUCTS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -149,6 +151,11 @@ fun Dashboard(navController: NavHostController){
 
                     )
                 }
+            }
+            Button(onClick = {
+                navController.navigate(ROUTE_LISTPRODUCTS)
+            }) {
+                Text("PRODUCT LIST")
             }
         }
     }

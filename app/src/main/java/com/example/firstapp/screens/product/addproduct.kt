@@ -148,7 +148,6 @@ fun AddProduct(navController: NavHostController){
                 fontWeight = FontWeight.Bold,)
         }
     }
-
 }
 
 @Preview(showBackground = true)

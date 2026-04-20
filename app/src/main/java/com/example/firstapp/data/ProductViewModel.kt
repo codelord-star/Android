@@ -3,15 +3,24 @@ package com.example.firstapp.data
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavUri
+import com.example.firstapp.models.Product
 import com.example.firstapp.navigation.ROUTE_DASHBOARD
+import com.example.firstapp.navigation.ROUTE_LISTPRODUCTS
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -56,7 +65,7 @@ class ProductViewModel(var navController: NavHostController, var context: Contex
                     if (it.isSuccessful) {
                         Toast.makeText(context, "Product saved successfully", Toast.LENGTH_SHORT).show()
 //                            navController.navigate(ROUTE_LISTPRODUCT)
-                        navController.navigate(ROUTE_DASHBOARD)
+                        navController.navigate(ROUTE_LISTPRODUCTS)
                     } else {
                         Toast.makeText(context, "Error: ${it.exception?.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -102,8 +111,83 @@ class ProductViewModel(var navController: NavHostController, var context: Contex
 
         return secureUrl ?: throw Exception("Failed to get image URL")
     }
+    //R - Read
+    //fetch all products from firebase
+    fun allProducts(
+        product: MutableState<Product>,
+        products: SnapshotStateList<Product>
+    ): SnapshotStateList<Product> {
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                products.clear()
+                for (snap in snapshot.children) {
+                    val retrievedProduct = snap.getValue(Product::class.java)
+                    if (retrievedProduct != null) {
+                        product.value = retrievedProduct
+                        products.add(retrievedProduct)
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Database error", Toast.LENGTH_SHORT).show()
+            }
+        })
+        return products
+    }
 
-    //read from our db the products
-    //update
-    //delete
+    //D - delete
+    fun deleteProduct(productId: String) {
+        databaseReference.child(productId).removeValue()
+            .addOnSuccessListener {
+                Toast.makeText(context, "Product deleted", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Failed to delete", Toast.LENGTH_SHORT).show()
+            }
+    }
+    //U-update
+    //update an existing product in db
+    // Update Product  function
+    fun updateProduct(
+        productId: String,
+        name: String,
+        price: String,
+        description: String,
+        imageUri: Uri?
+    ) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val newImageUrl = imageUri?.let { uploadToCloudinary(context, it) }
+
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                val userId = currentUser?.uid ?: ""
+
+                val updates = mutableMapOf<String, Any>(
+                    "id" to productId,
+                    "name" to name,
+                    "price" to price,
+                    "description" to description,
+                    "userId" to userId
+                )
+
+                if (!newImageUrl.isNullOrEmpty()) {
+                    updates["imageUrl"] = newImageUrl
+                }
+
+                databaseReference.child(productId).updateChildren(updates).await()
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Product updated successfully", Toast.LENGTH_LONG)
+                        .show()
+                    navController.navigate(ROUTE_LISTPRODUCTS)
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Update failed: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 }
