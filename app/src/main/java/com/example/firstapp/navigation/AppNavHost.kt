@@ -11,6 +11,7 @@ import com.example.firstapp.screens.login.LoginScreen
 import com.example.firstapp.screens.product.AddProduct
 import com.example.firstapp.screens.product.ProductListScreen
 import com.example.firstapp.screens.product.UpdateProductScreen
+import com.example.firstapp.screens.profile.ProfileScreen
 import com.example.firstapp.screens.register.RegisterScreen
 import com.example.firstapp.screens.splashscreen.Splashscreen
 
@@ -48,6 +49,9 @@ fun AppNavHost(
         composable (ROUTE_UPDATEPRODUCT + "/{productId}"){ backStackEntry ->
                 val productId = backStackEntry.arguments?.getString("productId")!!
             UpdateProductScreen(navController, productId)
+        }
+        composable (ROUTE_PROFILE){
+            ProfileScreen(navController)
         }
     }
 }
